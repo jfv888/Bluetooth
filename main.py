@@ -1,16 +1,19 @@
-# This is a sample Python script.
+from bluepy.btle import Scanner, DefaultDelegate
 
-# Press Maj+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+class ScanDelegate(DefaultDelegate):
+    def __init__(self):
+        DefaultDelegate.__init__(self)
 
+    def handleDiscovery(self, dev, isNewDev, isNewData):
+        if isNewDev:
+            print ("Discovered device", dev.addr)
+        elif isNewData:
+            print ("Received new data from", dev.addr)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+scanner = Scanner().withDelegate(ScanDelegate())
+devices = scanner.scan(10.0)
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+for dev in devices:
+    print ("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
+    for (adtype, desc, value) in dev.getScanData():
+        print ("  %s = %s" % (desc, value))
